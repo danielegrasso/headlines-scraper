@@ -1,0 +1,47 @@
+name: Daily Headlines Scraper
+
+on:
+  schedule:
+    # Ejecutar todos los días a las 8:00 AM UTC (10:00 AM hora española)
+    - cron: '0 8 * * *'
+  workflow_dispatch: # Permite ejecución manual
+
+jobs:
+  scrape-headlines:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        pip install requests beautifulsoup4
+        
+    - name: Run scraper
+      run: |
+        python3 headlines_scraper.py
+        
+    - name: Upload to Dropbox
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./
+        server-dir: ./pruebas\ cursor/
+        exclude: |
+          **/.git*
+          **/.git*/**
+          **/node_modules/**
+          **/.github/**
+          **/*.py
+          **/*.yml
+          **/*.txt
+          **/*.sh
+          **/.DS_Store 

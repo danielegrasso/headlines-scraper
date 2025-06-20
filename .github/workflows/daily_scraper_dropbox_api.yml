@@ -1,0 +1,49 @@
+name: Daily Headlines Scraper (Dropbox API)
+
+on:
+  schedule:
+    # Ejecutar todos los días a las 8:00 AM UTC (10:00 AM hora española)
+    - cron: '0 8 * * *'
+  workflow_dispatch: # Permite ejecución manual
+
+jobs:
+  scrape-headlines:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        pip install requests beautifulsoup4 dropbox
+        
+    - name: Run scraper
+      run: |
+        python3 headlines_scraper.py
+        
+    - name: Upload to Dropbox
+      run: |
+        python3 -c "
+        import dropbox
+        import os
+        from datetime import datetime
+        
+        # Obtener el archivo HTML más reciente
+        html_files = [f for f in os.listdir('.') if f.startswith('titulares_') and f.endswith('.html')]
+        if html_files:
+            latest_file = max(html_files, key=os.path.getctime)
+            
+            # Subir a Dropbox
+            dbx = dropbox.Dropbox('${{ secrets.DROPBOX_ACCESS_TOKEN }}')
+            
+            with open(latest_file, 'rb') as f:
+                dbx.files_upload(f.read(), f'/pruebas cursor/{latest_file}', mode=dropbox.files.WriteMode.overwrite)
+                
+            print(f'Archivo {latest_file} subido a Dropbox')
+        " 
