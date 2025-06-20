@@ -3,7 +3,7 @@ name: Daily Headlines Scraper
 on:
   schedule:
     # Ejecutar todos los días a las 8:00 AM UTC (10:00 AM hora española)
-    - cron: '0 8 * * *'
+    - cron: '0 6 * * *'
   workflow_dispatch: # Permite ejecución manual
 
 jobs:
