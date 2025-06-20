@@ -1,0 +1,40 @@
+name: Test Run - Headlines Scraper
+
+on:
+  workflow_dispatch: # Solo ejecución manual
+
+jobs:
+  test-scraper:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        pip install requests beautifulsoup4
+        
+    - name: Run scraper
+      run: |
+        python3 headlines_scraper.py
+        
+    - name: List generated files
+      run: |
+        ls -la titulares_*.html
+        
+    - name: Show HTML preview
+      run: |
+        echo "=== PREVIEW DEL HTML GENERADO ==="
+        head -50 titulares_*.html | tail -20
+        
+    - name: Upload HTML as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: headlines-html
+        path: titulares_*.html 
